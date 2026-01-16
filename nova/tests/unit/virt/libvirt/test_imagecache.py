@@ -60,9 +60,9 @@ class GetCacheFnameTestCase(test.NoDBTestCase):
         # serves as a canary to warn if any change in underlying libraries
         # would produce output incompatible with current usage.
 
-        # Take a known image_id and the pre-calculated hexdigest of its sha1
+        # Take a known image_id and the pre-calculated hexdigest of its sha256
         image_id = 'fd0cb2f1-8375-44c9-b1f4-3e1f4c4a8ef0'
-        expected_cache_name = '0d5e6b61602d758984b3bf038267614d6016eb2a'
+        expected_cache_name = 'ab4247334f43ce4181fa26996872322d9a933e2bc25eac5571c041463466a2b9'
 
         cache_name = imagecache.get_cache_fname(image_id)
         self.assertEqual(expected_cache_name, cache_name)
@@ -98,12 +98,12 @@ class ImageCacheManagerTestCase(test.NoDBTestCase):
                    'ephemeral_20_abcdefg',
                    '00000004',
                    'swap_1000']
-        images = ['e97222e91fc4241f49a7f520d1dcf446751129b3_sm',
-                  'e09c675c2d1cfac32dae3c2d83689c8c94bc693b_sm',
-                  'e97222e91fc4241f49a7f520d1dcf446751129b3',
-                  '17d1b00b81642842e514494a78e804e9a511637c',
-                  '17d1b00b81642842e514494a78e804e9a511637c_5368709120',
-                  '17d1b00b81642842e514494a78e804e9a511637c_10737418240']
+        images = ['cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06_sm',
+                  '5bb21ac469b5e7df4e17899d4aae0adfb430f0f0b336a2242ef1a22d25bd2e53_sm',
+                  'cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06',
+                  'b0542da3f90bad69318e16ec7fcb6b13b089971886999e08bec91cea34891f0f',
+                  'b0542da3f90bad69318e16ec7fcb6b13b089971886999e08bec91cea34891f0f_5368709120',
+                  'b0542da3f90bad69318e16ec7fcb6b13b089971886999e08bec91cea34891f0f_10737418240']
         listing.extend(images)
 
         self.stub_out('os.listdir', lambda x: listing)
@@ -122,11 +122,11 @@ class ImageCacheManagerTestCase(test.NoDBTestCase):
         self.assertEqual(sorted(sanitized), sorted(images))
 
         expected = os.path.join(base_dir,
-                                'e97222e91fc4241f49a7f520d1dcf446751129b3')
+                                'cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06')
         self.assertIn(expected, image_cache_manager.unexplained_images)
 
         expected = os.path.join(base_dir,
-                                '17d1b00b81642842e514494a78e804e9a511637c_'
+                                'b0542da3f90bad69318e16ec7fcb6b13b089971886999e08bec91cea34891f0f_'
                                 '10737418240')
         self.assertIn(expected, image_cache_manager.unexplained_images)
 
@@ -139,11 +139,11 @@ class ImageCacheManagerTestCase(test.NoDBTestCase):
         self.assertEqual(len(image_cache_manager.originals), 2)
 
         expected = os.path.join(base_dir,
-                                '17d1b00b81642842e514494a78e804e9a511637c')
+                                'b0542da3f90bad69318e16ec7fcb6b13b089971886999e08bec91cea34891f0f')
         self.assertIn(expected, image_cache_manager.originals)
 
         unexpected = os.path.join(base_dir,
-                                  '17d1b00b81642842e514494a78e804e9a511637c_'
+                                  'b0542da3f90bad69318e16ec7fcb6b13b089971886999e08bec91cea34891f0f_'
                                 '10737418240')
         self.assertNotIn(unexpected, image_cache_manager.originals)
 
@@ -160,11 +160,11 @@ class ImageCacheManagerTestCase(test.NoDBTestCase):
         self.stub_out('os.path.exists',
                       lambda x: x.find('instance-') != -1)
         self.stub_out('nova.virt.libvirt.utils.get_disk_backing_file',
-                      lambda x: 'e97222e91fc4241f49a7f520d1dcf446751129b3_sm')
+                      lambda x: 'cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06_sm')
 
         found = os.path.join(CONF.instances_path,
                              CONF.image_cache.subdirectory_name,
-                             'e97222e91fc4241f49a7f520d1dcf446751129b3_sm')
+                             'cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06_sm')
 
         image_cache_manager = imagecache.ImageCacheManager()
         image_cache_manager.unexplained_images = [found]
@@ -182,12 +182,12 @@ class ImageCacheManagerTestCase(test.NoDBTestCase):
         self.stub_out('os.path.exists',
                       lambda x: x.find('instance-') != -1)
         self.stub_out('nova.virt.libvirt.utils.get_disk_backing_file',
-                      lambda x: ('e97222e91fc4241f49a7f520d1dcf446751129b3_'
+                      lambda x: ('cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06_'
                                  '10737418240'))
 
         found = os.path.join(CONF.instances_path,
                              CONF.image_cache.subdirectory_name,
-                             'e97222e91fc4241f49a7f520d1dcf446751129b3_'
+                             'cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06_'
                              '10737418240')
 
         image_cache_manager = imagecache.ImageCacheManager()
@@ -205,11 +205,11 @@ class ImageCacheManagerTestCase(test.NoDBTestCase):
         self.stub_out('os.path.exists',
                       lambda x: x.find('banana-42-hamster') != -1)
         self.stub_out('nova.virt.libvirt.utils.get_disk_backing_file',
-                      lambda x: 'e97222e91fc4241f49a7f520d1dcf446751129b3_sm')
+                      lambda x: 'cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06_sm')
 
         found = os.path.join(CONF.instances_path,
                              CONF.image_cache.subdirectory_name,
-                             'e97222e91fc4241f49a7f520d1dcf446751129b3_sm')
+                             'cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06_sm')
 
         image_cache_manager = imagecache.ImageCacheManager()
         image_cache_manager.unexplained_images = [found]
@@ -423,8 +423,8 @@ class ImageCacheManagerTestCase(test.NoDBTestCase):
 
         base_file_list = ['00000001',
                           'ephemeral_0_20_None',
-                          'e97222e91fc4241f49a7f520d1dcf446751129b3_sm',
-                          'e09c675c2d1cfac32dae3c2d83689c8c94bc693b_sm',
+                          'cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06_sm',
+                          '5bb21ac469b5e7df4e17899d4aae0adfb430f0f0b336a2242ef1a22d25bd2e53_sm',
                           hashed_42,
                           hashed_1,
                           hashed_21,
@@ -567,8 +567,8 @@ class ImageCacheManagerTestCase(test.NoDBTestCase):
             self.assertEqual(len(image_cache_manager.active_base_files),
                              len(active))
 
-            for rem in [fq_path('e97222e91fc4241f49a7f520d1dcf446751129b3_sm'),
-                        fq_path('e09c675c2d1cfac32dae3c2d83689c8c94bc693b_sm'),
+            for rem in [fq_path('cc292b92ce7f10f2e4f727ecdf4b12528127c51b6ddf6058e213674603190d06_sm'),
+                        fq_path('5bb21ac469b5e7df4e17899d4aae0adfb430f0f0b336a2242ef1a22d25bd2e53_sm'),
                         fq_path(hashed_42),
                         fq_path('%s_10737418240' % hashed_1)]:
                 self.assertIn(rem, image_cache_manager.removable_base_files)

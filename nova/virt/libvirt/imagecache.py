@@ -42,14 +42,14 @@ CONF = nova.conf.CONF
 
 
 def get_cache_fname(image_id):
-    """Return a filename based on the SHA1 hash of a given image ID.
+    """Return a filename based on the SHA256 hash of a given image ID.
 
     Image files stored in the _base directory that match this pattern
     are considered for cleanup by the image cache manager. The cache
     manager considers the file to be in use if it matches an instance's
     image_ref, kernel_id or ramdisk_id property.
     """
-    return hashlib.sha1(image_id.encode('utf-8')).hexdigest()
+    return hashlib.sha256(image_id.encode('utf-8')).hexdigest()
 
 
 class ImageCacheManager(imagecache.ImageCacheManager):
@@ -106,7 +106,7 @@ class ImageCacheManager(imagecache.ImageCacheManager):
         self.unexplained_images, self.originals, and self.back_swap_images.
         """
 
-        digest_size = hashlib.sha1().digest_size * 2
+        digest_size = hashlib.sha256().digest_size * 2
         for ent in os.listdir(base_dir):
             if len(ent) == digest_size:
                 self._store_image(base_dir, ent, original=True)
@@ -314,7 +314,7 @@ class ImageCacheManager(imagecache.ImageCacheManager):
         LOG.debug('Verify base images')
         # Determine what images are on disk because they're in use
         for img in self.used_images:
-            fingerprint = hashlib.sha1(
+            fingerprint = hashlib.sha256(
                     encodeutils.safe_encode(img)).hexdigest()
             LOG.debug('Image id %(id)s yields fingerprint %(fingerprint)s',
                       {'id': img,
@@ -353,7 +353,7 @@ class ImageCacheManager(imagecache.ImageCacheManager):
 
         # NOTE(mikal): The new scheme for base images is as follows -- an
         # image is streamed from the image service to _base (filename is the
-        # sha1 hash of the image id). If CoW is enabled, that file is then
+        # sha256 hash of the image id). If CoW is enabled, that file is then
         # resized to be the correct size for the instance (filename is the
         # same as the original, but with an underscore and the resized size
         # in bytes). This second file is then CoW'd to the instance disk. If
