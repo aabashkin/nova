@@ -75,8 +75,8 @@ def generate_fingerprint(public_key: str) -> str:
         serialization.load_ssh_public_key(
             pub_bytes, backends.default_backend())
         pub_data = base64.b64decode(public_key.split(' ')[1])
-        raw_fp = hashlib.md5(pub_data, usedforsecurity=False).hexdigest()
-        return ':'.join(a + b for a, b in zip(raw_fp[::2], raw_fp[1::2]))
+        raw_fp = hashlib.sha256(pub_data).digest()
+        return 'SHA256:' + base64.b64encode(raw_fp).decode('ascii').rstrip('=')
     except Exception:
         raise exception.InvalidKeypair(
             reason=_('failed to generate fingerprint'))
@@ -89,7 +89,7 @@ def generate_x509_fingerprint(pem_key: ty.Union[bytes, str]) -> str:
         cert = x509.load_pem_x509_certificate(
             pem_key, backends.default_backend())
         raw_fp = binascii.hexlify(
-            cert.fingerprint(hashes.SHA1())
+            cert.fingerprint(hashes.SHA256())
         ).decode('ascii')
         return ':'.join(a + b for a, b in zip(raw_fp[::2], raw_fp[1::2]))
     except (ValueError, TypeError, binascii.Error) as ex:
