@@ -285,7 +285,8 @@ def _get_hash_str(base_str):
     NOTE: This function uses MD5 with usedforsecurity=False, which is
     acceptable for non-cryptographic purposes such as generating unique
     filesystem identifiers. MD5 should NOT be used for security-critical
-    operations.
+    operations. (This is a duplicate of utils.get_hash_str() due to privsep
+    isolation constraints.)
     """
     if isinstance(base_str, str):
         base_str = base_str.encode('utf-8')
